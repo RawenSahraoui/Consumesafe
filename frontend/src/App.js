@@ -90,14 +90,14 @@ function App() {
               {result.is_boycotted ? (
                 <>
                   <div className="status boycott">
-                    <span className="icon">⚠️</span>
+                    <span className="icon"></span>
                     <span>PRODUIT BOYCOTTÉ</span>
                   </div>
                   <p className="reason"><strong>Raison:</strong> {result.reason}</p>
                   
                   {result.alternatives && result.alternatives.length > 0 && (
                     <div className="alternatives-box">
-                      <h3>✅ Alternatives tunisiennes recommandées:</h3>
+                      <h3> Alternatives tunisiennes recommandées:</h3>
                       <ul>
                         {result.alternatives.map((alt, index) => (
                           <li key={index}>{alt}</li>
@@ -108,7 +108,7 @@ function App() {
                 </>
               ) : (
                 <div className="status safe">
-                  <span className="icon">✅</span>
+                  <span className="icon"></span>
                   <span>PRODUIT NON BOYCOTTÉ</span>
                 </div>
               )}
