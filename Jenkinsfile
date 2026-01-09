@@ -60,16 +60,19 @@ pipeline {
             }
         }
 
-        stage("Deploy to Kubernetes") {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh """
-                  kubectl apply -f k8s/deployments/backend-deployment.yaml
-                  kubectl apply -f k8s/deployments/frontend-deployment.yaml
-                  kubectl apply -f k8s/services/backend-service.yaml
-                  kubectl apply -f k8s/services/frontend-service.yaml
-                """
+                withCredentials([file(credentialsId: 'kubecfg-file', variable: 'KUBECONFIG')]) {
+                    sh '''
+                    kubectl get nodes
+
+                    kubectl apply -f k8s/deployments/backend-deployment.yaml
+                    kubectl apply -f k8s/deployments/frontend-deployment.yaml
+                    kubectl apply -f k8s/services/backend-service.yaml
+                    kubectl apply -f k8s/services/frontend-service.yaml
+                    '''
+                }
             }
-        }
     }
 
     post {
@@ -80,4 +83,6 @@ pipeline {
             echo "Pipeline échoué — vérifier les logs"
         }
     }
+}
+
 }
