@@ -40,7 +40,7 @@ pipeline {
         stage("Login Docker Hub") {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: "$DOCKER_CRED",
+                    credentialsId: DOCKER_CRED,
                     usernameVariable: "DOCKER_USER",
                     passwordVariable: "DOCKER_PASS"
                 )]) {
@@ -73,7 +73,8 @@ pipeline {
                     '''
                 }
             }
-    }
+        }
+    }   
 
     post {
         success {
@@ -83,6 +84,4 @@ pipeline {
             echo "Pipeline échoué — vérifier les logs"
         }
     }
-}
-
 }
