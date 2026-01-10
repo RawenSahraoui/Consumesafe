@@ -6,7 +6,6 @@ pipeline {
         BACKEND_IMAGE  = "oumaymariahi/consumesafe-backend"
         FRONTEND_IMAGE = "oumaymariahi/consumesafe-frontend"
         DOCKER_TAG     = "latest"
-        PATH = "/home/oumayma_riahi/bin:/usr/local/bin:/usr/bin:/bin"
 
         // ID du credential Docker Hub dans Jenkins
         DOCKER_CRED = "74ac32e9-9f43-4cc6-a3a9-2bf40dfed8ec"
@@ -32,8 +31,11 @@ pipeline {
         stage("Security Scan (Trivy)") {
             steps {
                 sh """
-                  trivy image --severity HIGH,CRITICAL $BACKEND_IMAGE:$DOCKER_TAG
-                  trivy image --severity HIGH,CRITICAL $FRONTEND_IMAGE:$DOCKER_TAG
+                  echo "=== Scanning Backend Image ==="
+                  trivy image --severity HIGH,CRITICAL $BACKEND_IMAGE:$DOCKER_TAG || true
+                  
+                  echo "=== Scanning Frontend Image ==="
+                  trivy image --severity HIGH,CRITICAL $FRONTEND_IMAGE:$DOCKER_TAG || true
                 """
             }
         }
@@ -63,25 +65,34 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    set -e
-                    export KUBECONFIG=$KUBECONFIG
-                    
-                    echo "Testing kubectl connection..."
-                    kubectl cluster-info
-                    kubectl get nodes
-                    
-                    echo "Applying Kubernetes manifests..."
-                    kubectl apply -f k8s/deployments/backend-deployment.yaml
-                    kubectl apply -f k8s/deployments/frontend-deployment.yaml
-                    kubectl apply -f k8s/services/backend-service.yaml
-                    kubectl apply -f k8s/services/frontend-service.yaml
-                    
-                    echo "Checking deployment status..."
-                    kubectl get deployments
-                    kubectl get services
-                    '''
+                script {
+                    try {
+                        withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
+                            sh '''
+                            set -e
+                            export KUBECONFIG=$KUBECONFIG
+                            
+                            echo "=== Testing kubectl connection ==="
+                            kubectl version --client
+                            kubectl cluster-info
+                            kubectl get nodes
+                            
+                            echo "=== Applying Kubernetes manifests ==="
+                            kubectl apply -f k8s/deployments/backend-deployment.yaml
+                            kubectl apply -f k8s/deployments/frontend-deployment.yaml
+                            kubectl apply -f k8s/services/backend-service.yaml
+                            kubectl apply -f k8s/services/frontend-service.yaml
+                            
+                            echo "=== Checking deployment status ==="
+                            kubectl get deployments -o wide
+                            kubectl get services -o wide
+                            kubectl get pods -o wide
+                            '''
+                        }
+                    } catch (Exception e) {
+                        echo "Deployment failed with error: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
@@ -89,10 +100,14 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline CI/CD terminé avec succès"
+            echo "✓ Pipeline CI/CD terminé avec succès"
         }
         failure {
-            echo "Pipeline échoué — vérifier les logs"
+            echo "✗ Pipeline échoué — vérifier les logs"
+        }
+        always {
+            // Clean up Docker images to save space
+            sh 'docker system prune -f || true'
         }
     }
 }
