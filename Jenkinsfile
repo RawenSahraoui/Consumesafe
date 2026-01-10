@@ -6,6 +6,7 @@ pipeline {
         BACKEND_IMAGE  = "oumaymariahi/consumesafe-backend"
         FRONTEND_IMAGE = "oumaymariahi/consumesafe-frontend"
         DOCKER_TAG     = "latest"
+        PATH = "/home/oumayma_riahi/bin:/usr/local/bin:/usr/bin:/bin"
 
         // ID du credential Docker Hub dans Jenkins
         DOCKER_CRED = "74ac32e9-9f43-4cc6-a3a9-2bf40dfed8ec"
@@ -31,8 +32,8 @@ pipeline {
         stage("Security Scan (Trivy)") {
             steps {
                 sh """
-                  trivy image --severity HIGH,CRITICAL $BACKEND_IMAGE:$DOCKER_TAG || true
-                  trivy image --severity HIGH,CRITICAL $FRONTEND_IMAGE:$DOCKER_TAG || true
+                  trivy image --severity HIGH,CRITICAL $BACKEND_IMAGE:$DOCKER_TAG
+                  trivy image --severity HIGH,CRITICAL $FRONTEND_IMAGE:$DOCKER_TAG
                 """
             }
         }
