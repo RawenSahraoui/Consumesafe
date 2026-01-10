@@ -60,21 +60,30 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'kubecfg-file', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    kubectl get nodes
-
-                    kubectl apply -f k8s/deployments/backend-deployment.yaml
-                    kubectl apply -f k8s/deployments/frontend-deployment.yaml
-                    kubectl apply -f k8s/services/backend-service.yaml
-                    kubectl apply -f k8s/services/frontend-service.yaml
-                    '''
-                }
-            }
+      stage('Deploy to Kubernetes') {
+    steps {
+        withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
+            sh '''
+            set -e
+            export KUBECONFIG=$KUBECONFIG
+            
+            echo "Testing kubectl connection..."
+            kubectl cluster-info
+            kubectl get nodes
+            
+            echo "Applying Kubernetes manifests..."
+            kubectl apply -f k8s/deployments/backend-deployment.yaml
+            kubectl apply -f k8s/deployments/frontend-deployment.yaml
+            kubectl apply -f k8s/services/backend-service.yaml
+            kubectl apply -f k8s/services/frontend-service.yaml
+            
+            echo "Checking deployment status..."
+            kubectl get deployments
+            kubectl get services
+            '''
         }
-    }   
+    }
+}
 
     post {
         success {
@@ -84,4 +93,6 @@ pipeline {
             echo "Pipeline échoué — vérifier les logs"
         }
     }
+}
+
 }
