@@ -26,7 +26,8 @@ spec:
             cpu: "100m"
           limits:
             memory: "256Mi"
-            cpu: "200m"apiVersion: apps/v1
+            cpu: "200m"
+            apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
