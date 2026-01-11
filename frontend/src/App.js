@@ -13,7 +13,6 @@ function App() {
   const [alternatives, setAlternatives] = useState([]);
 
   useEffect(() => {
-    // Charger les catégories au démarrage
     fetchCategories();
   }, []);
 
@@ -61,12 +60,11 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>🛡️ ConsumeSafe</h1>
+        <h1>ConsumeSafe</h1>
         <p className="subtitle">Vérifiez si un produit est boycotté et trouvez des alternatives tunisiennes</p>
       </header>
 
       <main className="container">
-        {/* Section de recherche */}
         <section className="search-section">
           <form onSubmit={checkProduct}>
             <div className="input-group">
@@ -83,21 +81,19 @@ function App() {
             </div>
           </form>
 
-          {/* Résultat de la recherche */}
           {result && !result.error && (
             <div className={`result-card ${result.is_boycotted ? 'boycotted' : 'safe'}`}>
               <h2>{result.product_name}</h2>
               {result.is_boycotted ? (
                 <>
                   <div className="status boycott">
-                    <span className="icon"></span>
                     <span>PRODUIT BOYCOTTÉ</span>
                   </div>
                   <p className="reason"><strong>Raison:</strong> {result.reason}</p>
                   
                   {result.alternatives && result.alternatives.length > 0 && (
                     <div className="alternatives-box">
-                      <h3> Alternatives tunisiennes recommandées:</h3>
+                      <h3>Alternatives tunisiennes recommandées:</h3>
                       <ul>
                         {result.alternatives.map((alt, index) => (
                           <li key={index}>{alt}</li>
@@ -108,7 +104,6 @@ function App() {
                 </>
               ) : (
                 <div className="status safe">
-                  <span className="icon"></span>
                   <span>PRODUIT NON BOYCOTTÉ</span>
                 </div>
               )}
@@ -122,9 +117,8 @@ function App() {
           )}
         </section>
 
-        {/* Section des catégories */}
         <section className="categories-section">
-          <h2>🇹🇳 Produits Tunisiens par Catégorie</h2>
+          <h2>Produits Tunisiens par Catégorie</h2>
           <div className="categories-grid">
             {categories.map((category) => (
               <button
@@ -137,7 +131,6 @@ function App() {
             ))}
           </div>
 
-          {/* Affichage des alternatives */}
           {alternatives.length > 0 && (
             <div className="alternatives-list">
               <h3>Produits disponibles - {selectedCategory}</h3>
@@ -146,7 +139,7 @@ function App() {
                   <div key={index} className="product-card">
                     <h4>{product.name}</h4>
                     <p className="product-type">{product.type}</p>
-                    <p className="product-origin">🇹🇳 {product.origin}</p>
+                    <p className="product-origin">Origine: {product.origin}</p>
                   </div>
                 ))}
               </div>
@@ -156,7 +149,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Made with ❤️ for Tunisia | ConsumeSafe 2024</p>
+        <p>ConsumeSafe 2024 - Made for Tunisia</p>
       </footer>
     </div>
   );
